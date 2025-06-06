@@ -1,3 +1,5 @@
+import { firestore } from "@/connections";
+
 type Purchase = {
   id: string;
   from: string;
@@ -44,12 +46,16 @@ export async function createPurchase(
     date: new Date(),
     status: "pending",
   };
-  // guardamos esta nueva purchase en la db y devolvemos el id
-  return "1234";
+  const donateCollection = await firestore.collection("donates").doc();
+  await donateCollection.set(purchase);
+  return donateCollection.id;
 }
 
-export function confirmPurchase(purchaseId: string) {
-  // confirmamos la compra en la DB
+export async function confirmPurchase(purchaseId: string) {
+  const docRef = await firestore.collection("donates").doc(purchaseId);
+  await docRef.update({
+    status: "payment",
+  });
   console.log(`Purchase ${purchaseId} confirmed`);
   return true;
 }
